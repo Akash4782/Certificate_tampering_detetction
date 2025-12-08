@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: 'Helvetica', sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        .header {
+            background: #3b82f6;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Certificate Issued</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ name }},</p>
+            <p>We are pleased to inform you that your certificate for <strong>{{ course }}</strong> has been
+                successfully issued and recorded on our blockchain ledger.</p>
+
+            <p><strong>Certificate Details:</strong></p>
+            <ul>
+                <li>Certificate ID: {{ cert_id }}</li>
+                <li>Issue Date: {{ date }}</li>
+                <li>Blockchain Block: #{{ block_index }}</li>
+            </ul>
+
+            <p>Your digital certificate is attached to this email. You can also verify its authenticity by scanning the
+                QR code or visiting our verification portal.</p>
+
+            <p style="text-align: center;">
+                <a href="{{ verify_url }}" class="btn">Verify Online</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>&copy; {{ year }} BlockChain University. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+
+</html>

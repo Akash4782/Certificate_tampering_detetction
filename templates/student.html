@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Certificates</title>
+</head>
+<body>
+    <h2>Available Certificates</h2>
+
+    {% for cert in certificates %}
+        <p>
+            {{ cert }} — 
+            <a href="/certificates/{{ cert }}" download>Download</a>
+        </p>
+    {% endfor %}
+</body>
+</html>

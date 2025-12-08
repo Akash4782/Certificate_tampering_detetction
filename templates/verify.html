@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Certificate - BCT Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="dashboard-page">
+    {% include 'components/header.html' %}
+
+    <div class="main-layout">
+        {% include 'components/sidebar.html' %}
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Verify Certificate</h1>
+                <p>Verify the authenticity of a certificate by uploading the PDF file</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    <span>{{ message }}</span>
+                    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="verify-container">
+                <!-- Show cert_id and hash if from QR code -->
+                {% if cert_id and qr_hash %}
+                <div class="verify-card">
+                    <h3>Certificate Information</h3>
+                    <div class="info-display">
+                        <div class="info-row">
+                            <span class="info-label">Certificate ID:</span>
+                            <span class="info-value">{{ cert_id }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Original Hash (from QR):</span>
+                            <span class="info-value hash-value">{{ qr_hash }}</span>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('verify_upload') }}" enctype="multipart/form-data"
+                        class="verify-form">
+                        <input type="hidden" name="cert_id" value="{{ cert_id }}">
+                        <input type="hidden" name="hash" value="{{ qr_hash }}">
+
+                        <div class="form-group">
+                            <label for="file">Upload Certificate PDF</label>
+                            <input type="file" id="file" name="file" accept="application/pdf" required
+                                class="file-input">
+                            <small>Upload the certificate PDF file to verify its authenticity</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">
+                            <span>Verify Certificate</span>
+                            <span class="btn-icon">✓</span>
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <!-- Legacy hash-only verification -->
+                <div class="verify-card">
+                    <form method="POST" action="{{ url_for('verify') }}" class="verify-form">
+                        <div class="form-group">
+                            <label for="hash">Certificate Hash</label>
+                            <textarea id="hash" name="hash" rows="3" required
+                                placeholder="Enter the certificate hash or scan QR code">{{ request.args.get('hash', '') }}</textarea>
+                            <small>You can find the hash on the certificate or scan the QR code</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">
+                            <span>Verify Certificate</span>
+                            <span class="btn-icon">✓</span>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- Verification Result -->
+                {% if result %}
+                <div class="result-card result-{{ result.lower() }}">
+                    <div class="result-header">
+                        <div class="result-icon">
+                            {% if result == 'VALID' or result == 'Valid' %}✓{% else %}✗{% endif %}
+                        </div>
+                        <h2>Certificate {{ result }}</h2>
+                    </div>
+
+                    {% if verification_message %}
+                    <div class="result-body">
+                        <div class="verification-message">
+                            <p>{{ verification_message }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if result == 'VALID' or result == 'Valid' %}
+                    <div class="result-body">
+                        {% if certificate %}
+                        <div class="cert-info">
+                            <h4>Certificate Details</h4>
+                            <div class="info-row">
+                                <span class="info-label">Student Name:</span>
+                                <span class="info-value">{{ certificate.student_name }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Course:</span>
+                                <span class="info-value">{{ certificate.course_name }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Issue Date:</span>
+                                <span class="info-value">{{ certificate.issue_date.strftime('%B %d, %Y') }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if uploaded_hash and chain_hash and qr_hash %}
+                        <div class="hash-comparison">
+                            <h4>Hash Verification</h4>
+                            <div class="info-row">
+                                <span class="info-label">Uploaded PDF Hash:</span>
+                                <span class="info-value hash-value">{{ uploaded_hash }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Blockchain Hash:</span>
+                                <span class="info-value hash-value">{{ chain_hash }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">QR Code Hash:</span>
+                                <span class="info-value hash-value">{{ qr_hash }}</span>
+                            </div>
+                            <div class="hash-match">
+                                <p>✅ All hashes match - Certificate is authentic</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if block_info %}
+                        <div class="blockchain-info">
+                            <h4>Blockchain Proof</h4>
+                            <div class="block-info">
+                                <div class="info-row">
+                                    <span class="info-label">Block Index:</span>
+                                    <span class="info-value">{{ block_info.index }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Block Hash:</span>
+                                    <span class="info-value hash-value">{{ block_info.hash }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Previous Hash:</span>
+                                    <span class="info-value hash-value">{{ block_info.previous_hash }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Timestamp:</span>
+                                    <span class="info-value">{{ block_info.timestamp }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="result-body">
+                        {% if uploaded_hash and chain_hash and qr_hash %}
+                        <div class="hash-comparison">
+                            <h4>Hash Verification</h4>
+                            <div class="info-row">
+                                <span class="info-label">Uploaded PDF Hash:</span>
+                                <span class="info-value hash-value">{{ uploaded_hash }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Blockchain Hash:</span>
+                                <span class="info-value hash-value">{{ chain_hash }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">QR Code Hash:</span>
+                                <span class="info-value hash-value">{{ qr_hash }}</span>
+                            </div>
+                            <div class="hash-mismatch">
+                                <p>❌ Hashes do not match - Certificate has been tampered with</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="result-error-message">
+                            <p>❌ This certificate has been altered or is invalid. The PDF file does not match the
+                                original stored in the blockchain.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    {% include 'components/footer.html' %}
+
+    <!-- Futuristic Scanning Overlay -->
+    <div id="scanning-overlay" class="scanning-overlay hidden">
+        <div class="scanner-container">
+            <div class="scan-line"></div>
+            <div class="scan-grid"></div>
+            <div class="scan-content">
+                <div class="spinner-hud"></div>
+                <h2 class="scan-text" id="scan-status">Initializing Scanner...</h2>
+                <div class="scan-details" id="scan-details">
+                    <span class="code-line">Connecting to Blockchain Node...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/verify.js') }}"></script>
+</body>
+
+</html>

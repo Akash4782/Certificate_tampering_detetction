@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Certificate - BCT Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="dashboard-page">
+    <!-- Public Header (No Admin Links) -->
+    <header class="main-header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <span class="brand-link">
+                        <span class="brand-icon">🔗</span>
+                        <span class="brand-text">BCT Verification Portal</span>
+                    </span>
+                </div>
+                <!-- Navigation Links Removed for Public Portal -->
+            </div>
+        </nav>
+    </header>
+
+    <div class="main-layout" style="justify-content: center;">
+        <!-- Sidebar removed -->
+
+        <main class="main-content" style="max-width: 1000px; margin: 0 auto;">
+            <div class="page-header" style="text-align: center;">
+                <h1>Verify Certificate</h1>
+                <p>Verify the authenticity of a certificate by uploading the PDF file</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    <span>{{ message }}</span>
+                    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="verify-container">
+                <!-- Show cert_id and hash if from QR code -->
+                {% if cert_id and qr_hash %}
+                <div class="verify-card">
+                    <h3>Certificate Information</h3>
+                    <div class="info-display">
+                        <div class="info-row">
+                            <span class="info-label">Certificate ID:</span>
+                            <span class="info-value">{{ cert_id }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Original Hash (from QR):</span>
+                            <span class="info-value hash-value">{{ qr_hash }}</span>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('verify_upload') }}" enctype="multipart/form-data"
+                        class="verify-form">
+                        <input type="hidden" name="cert_id" value="{{ cert_id }}">
+                        <input type="hidden" name="hash" value="{{ qr_hash }}">
+
+                        <div class="form-group">
+                            <label for="file">Upload Certificate PDF</label>
+                            <input type="file" id="file" name="file" accept="application/pdf" required
+                                class="file-input">
+                            <small>Upload the certificate PDF file to verify its authenticity</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">
+                            <span>Verify Certificate</span>
+                            <span class="btn-icon">✓</span>
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <!-- Legacy hash-only verification -->
+                <div class="verify-card">
+                    <form method="POST" action="{{ url_for('verify') }}" class="verify-form">
+                        <div class="form-group">
+                            <label for="hash">Certificate Hash</label>
+                            <textarea id="hash" name="hash" rows="3" required
+                                placeholder="Enter the certificate hash or scan QR code">{{ request.args.get('hash', '') }}</textarea>
+                            <small>You can find the hash on the certificate or scan the QR code</small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">
+                            <span>Verify Certificate</span>
+                            <span class="btn-icon">✓</span>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- Verification Result -->
+                {% if result %}
+                <div class="result-card result-{{ result.lower() }}">
+                    <div class="result-header">
+                        <div class="result-icon">
+                            {% if result == 'VALID' or result == 'Valid' %}✓{% else %}✗{% endif %}
+                        </div>
+                        <h2>Certificate {{ result }}</h2>
+                    </div>
+
+                    {% if verification_message %}
+                    <div class="result-body">
+                        <div class="verification-message">
+                            <p>{{ verification_message }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if result == 'VALID' or result == 'Valid' %}
+                    <div class="result-body">
+                        {% if certificate %}
+                        <div class="cert-info">
+                            <h4>Certificate Details</h4>
+                            <div class="info-row">
+                                <span class="info-label">Student Name:</span>
+                                <span class="info-value">{{ certificate.student_name }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Course:</span>
+                                <span class="info-value">{{ certificate.course_name }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Issue Date:</span>
+                                <span class="info-value">{{ certificate.issue_date.strftime('%B %d, %Y') }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if uploaded_hash and chain_hash and qr_hash %}
+                        <div class="hash-comparison">
+                            <h4>Hash Verification</h4>
+                            <div class="info-row">
+                                <span class="info-label">Uploaded PDF Hash:</span>
+                                <span class="info-value hash-value">{{ uploaded_hash }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Blockchain Hash:</span>
+                                <span class="info-value hash-value">{{ chain_hash }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">QR Code Hash:</span>
+                                <span class="info-value hash-value">{{ qr_hash }}</span>
+                            </div>
+                            <div class="hash-match">
+                                <p>✅ All hashes match - Certificate is authentic</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if block_info %}
+                        <div class="blockchain-info">
+                            <h4>Blockchain Proof</h4>
+                            <div class="block-info">
+                                <div class="info-row">
+                                    <span class="info-label">Block Index:</span>
+                                    <span class="info-value">{{ block_info.index }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Block Hash:</span>
+                                    <span class="info-value hash-value">{{ block_info.hash }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Previous Hash:</span>
+                                    <span class="info-value hash-value">{{ block_info.previous_hash }}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Timestamp:</span>
+                                    <span class="info-value">{{ block_info.timestamp }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="result-body">
+                        {% if uploaded_hash and chain_hash and qr_hash %}
+                        <div class="hash-comparison">
+                            <h4>Hash Verification</h4>
+                            <div class="info-row">
+                                <span class="info-label">Uploaded PDF Hash:</span>
+                                <span class="info-value hash-value">{{ uploaded_hash }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Blockchain Hash:</span>
+                                <span class="info-value hash-value">{{ chain_hash }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">QR Code Hash:</span>
+                                <span class="info-value hash-value">{{ qr_hash }}</span>
+                            </div>
+                            <div class="hash-mismatch">
+                                <p>❌ Hashes do not match - Certificate has been tampered with</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="result-error-message">
+                            <p>❌ This certificate has been altered or is invalid. The PDF file does not match the
+                                original stored in the blockchain.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer (Rich Public Version) -->
+    <footer class="main-footer">
+        <div class="footer-wave"></div>
+        <div class="footer-content">
+            <div class="footer-container">
+                <div class="footer-section footer-brand">
+                    <div class="footer-logo">
+                        <span class="footer-logo-icon">🔗</span>
+                        <h3>BCT Project</h3>
+                    </div>
+                    <p class="footer-description">Blockchain Certificate Tracking System - Secure, tamper-proof
+                        certificate verification using cutting-edge blockchain technology.</p>
+                    <div class="footer-social">
+                        <span class="footer-social-label">Follow us:</span>
+                        <div class="social-links">
+                            <a href="#" class="social-link" title="GitHub" aria-label="GitHub">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                </svg>
+                            </a>
+                            <a href="#" class="social-link" title="Twitter" aria-label="Twitter">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                                </svg>
+                            </a>
+                            <a href="#" class="social-link" title="LinkedIn" aria-label="LinkedIn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('verify') }}">Verify Certificate</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('verify') }}">Certificate Verification</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4 class="footer-title">About</h4>
+                    <p class="footer-text">Built with modern web technologies including Flask, SQLAlchemy, and custom
+                        Blockchain implementation.</p>
+                    <div class="footer-tech">
+                        <span class="tech-badge">Flask</span>
+                        <span class="tech-badge">Blockchain</span>
+                        <span class="tech-badge">SQLAlchemy</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <p class="footer-copyright">
+                    © 2025 <strong>BCT Project</strong>. All rights reserved.
+                </p>
+                <div class="footer-credits">
+                    <span>Built by Akash Virdi • Trustless. Transparent. Immutable.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/verify.js') }}"></script>
+</body>
+
+</html>

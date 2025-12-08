@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - BCT Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="dashboard-page">
+    {% include 'components/header.html' %}
+
+    <div class="main-layout">
+        {% include 'components/sidebar.html' %}
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>My Dashboard</h1>
+                <p>View your certificates and achievements</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    <span>{{ message }}</span>
+                    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📜</div>
+                    <div class="stat-content">
+                        <h3>{{ certificates|length }}</h3>
+                        <p>My Certificates</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-content">
+                        <h3>{{ user_info.total_courses }}</h3>
+                        <p>Courses Completed</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-content">
+                        <h3>{% if user_info.latest_cert_date %}{{ user_info.latest_cert_date.strftime('%b %Y') }}{% else
+                            %}N/A{% endif %}</h3>
+                        <p>Latest Certificate</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">👤</div>
+                    <div class="stat-content">
+                        <h3>{{ user_info.member_since.strftime('%b %Y') }}</h3>
+                        <p>Member Since</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="info-card" style="margin-bottom: 2rem;">
+                <h3>👤 Profile Information</h3>
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                    <div>
+                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">Username</p>
+                        <p style="color: var(--text-main); font-weight: 500;">{{ user_info.username }}</p>
+                    </div>
+                    <div>
+                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">Email</p>
+                        <p style="color: var(--text-main); font-weight: 500;">{{ user_info.email }}</p>
+                    </div>
+                    <div>
+                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">Member Since
+                        </p>
+                        <p style="color: var(--text-main); font-weight: 500;">{{ user_info.member_since.strftime('%B %d,
+                            %Y') }}</p>
+                    </div>
+                    <div>
+                        <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.25rem;">Total
+                            Certificates</p>
+                        <p style="color: var(--text-main); font-weight: 500;">{{ user_info.total_certificates }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Chart -->
+            {% if course_stats and certificates|length > 0 %}
+            <div class="charts-section">
+                <div class="chart-card">
+                    <h3>Courses Completed</h3>
+                    <canvas id="coursesChart"></canvas>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions Section -->
+            <div class="info-card" style="margin-bottom: 2rem;">
+                <h3>⚡ Quick Actions</h3>
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <a href="#certificates" class="btn btn-primary" style="text-align: center; text-decoration: none;">
+                        📜 View Certificates
+                    </a>
+                    <a href="{{ url_for('verify') }}" class="btn btn-info"
+                        style="text-align: center; text-decoration: none;">
+                        🔍 Verify Certificate
+                    </a>
+                    <button onclick="document.querySelector('input[name=hash]').focus()" class="btn btn-success"
+                        style="text-align: center;">
+                        🔗 Link Certificate
+                    </button>
+                    {% if certificates|length > 0 %}
+                    <a href="{{ url_for('download_certificate', cert_id=certificates[0].id) }}"
+                        class="btn btn-secondary" style="text-align: center; text-decoration: none;">
+                        ⬇️ Download Latest
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Claim Certificate Section -->
+            <div class="info-card">
+                <h3>🔗 Link Your Certificates</h3>
+                <p>If you received a certificate but don't see it here, you can link it using the certificate hash.</p>
+                <form method="POST" action="{{ url_for('claim_certificate') }}" class="claim-form">
+                    <input type="text" name="hash" placeholder="Enter certificate hash from your PDF" required>
+                    <button type="submit" class="btn btn-primary">Link Certificate</button>
+                </form>
+            </div>
+
+            <!-- Certificates Section -->
+            <div id="certificates" class="content-card">
+                <h3>My Certificates</h3>
+                {% if certificates %}
+                <div class="certificates-grid">
+                    {% for cert in certificates %}
+                    <div class="certificate-card">
+                        <div class="cert-header">
+                            <span class="cert-icon">📜</span>
+                            <span class="cert-status">Verified</span>
+                        </div>
+                        <div class="cert-body">
+                            <h4>{{ cert.course_name }}</h4>
+                            <p class="cert-student">{{ cert.student_name }}</p>
+                            <p class="cert-date">Issued: {{ cert.issue_date.strftime('%B %d, %Y') }}</p>
+                            <div class="cert-hash">
+                                <small>Hash: {{ cert.blockchain_hash[:16] }}...</small>
+                                <button
+                                    onclick="navigator.clipboard.writeText('{{ cert.blockchain_hash }}'); this.textContent='✓ Copied!'; setTimeout(function(){this.textContent='📋'}.bind(this), 2000)"
+                                    style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1rem; padding: 0; margin-left: 0.5rem;"
+                                    title="Copy full hash">📋</button>
+                            </div>
+                        </div>
+                        <div class="cert-actions">
+                            <a href="{{ url_for('view_certificate', cert_id=cert.id) }}" class="btn btn-sm btn-primary"
+                                target="_blank">View</a>
+                            <a href="{{ url_for('download_certificate', cert_id=cert.id) }}"
+                                class="btn btn-sm btn-success">Download</a>
+                            <a href="{{ url_for('verify') }}?hash={{ cert.blockchain_hash }}"
+                                class="btn btn-sm btn-info">Verify</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📜</div>
+                    <h3>No Certificates Yet</h3>
+                    <p>You haven't received any certificates yet.</p>
+                    <div
+                        style="margin-top: 1.5rem; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-main);">How to get your certificates:</h4>
+                        <ol style="color: var(--text-muted);">
+                            <li style="margin-bottom: 0.75rem;">Wait for your administrator to issue a certificate for
+                                you</li>
+                            <li style="margin-bottom: 0.75rem;">If you already received a certificate PDF, use the "Link
+                                Your Certificates" section above to link it</li>
+                            <li style="margin-bottom: 0.75rem;">Make sure your name matches the name on the certificate
+                            </li>
+                            <li>Contact your administrator if you need assistance</li>
+                        </ol>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    {% include 'components/footer.html' %}
+
+    {% if course_stats %}
+    <script>
+        // Global Chart Defaults for Dark Theme
+        if (typeof Chart !== 'undefined' && Chart.defaults) {
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+        }
+
+        // Course data from server
+        var courseData = {{ course_stats | tojson | safe }};
+
+        // Initialize chart
+        (function () {
+            var ctx = document.getElementById('coursesChart').getContext('2d');
+            var labels = Object.keys(courseData);
+            var data = Object.values(courseData);
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(139, 92, 246, 0.8)',
+                        ],
+                        borderColor: 'rgba(15, 23, 42, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        })();
+    </script>
+    {% endif %}
+</body>
+
+</html>

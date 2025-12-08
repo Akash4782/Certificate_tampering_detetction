@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Marksheet - {{ name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            border-top: 4px solid #2c3e50;
+        }
+
+        h2 {
+            text-align: center;
+            margin: 0 0 8px 0;
+            padding: 0 120px 0 0;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        h3 {
+            text-align: center;
+            margin: 5px 0;
+            padding: 0 120px 0 0;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .university-header {
+            margin-bottom: 20px;
+            margin-top: 10px;
+            padding-right: 120px;
+        }
+
+        .info-table,
+        .result-table,
+        .grade-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        th,
+        td {
+            border: 1px solid #555;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #e1e1e1;
+            font-weight: bold;
+        }
+
+        .note {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .qr-section {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            text-align: center;
+            z-index: 10;
+            width: 110px;
+            height: 120px;
+        }
+
+        .qr-code {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #333;
+            padding: 3px;
+            background: white;
+            box-sizing: border-box;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .qr-code img {
+            width: 94px;
+            height: 94px;
+            object-fit: contain;
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        .qr-text {
+            font-size: 8px;
+            margin-top: 3px;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.1;
+            padding: 0;
+            width: 100%;
+            display: block;
+        }
+
+        .qr-info {
+            font-size: 7px;
+            margin-top: 2px;
+            color: #666;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .certificate-hash {
+            font-size: 8px;
+            color: #999;
+            margin-top: 10px;
+            word-break: break-all;
+            text-align: center;
+        }
+
+        .info-table {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .info-table th {
+            width: 35%;
+        }
+
+        .info-table td {
+            width: 65%;
+        }
+
+        .result-table {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .grade-table {
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- QR CODE SECTION REMOVED -->
+
+        <!-- UNIVERSITY HEADER -->
+        <div class="university-header">
+            <h2>{{ university_name or 'I.K. GUJRAL PUNJAB TECHNICAL UNIVERSITY, JALANDHAR' }}</h2>
+            <h3>{{ university_address or 'Jalandhar–Kapurthala Highway, Jalandhar' }}</h3>
+        </div>
+
+        <!-- STUDENT REGISTRATION DETAILS -->
+        <table class="info-table" style="position: relative;">
+            <tr>
+                <th style="width: 35%;">Regn. cum Roll No</th>
+                <td style="width: 65%;">{{ roll_number or 'N/A' }}</td>
+            </tr>
+            <tr>
+                <th>College/Institute ID</th>
+                <td>{{ college_id or 'N/A' }}</td>
+            </tr>
+            <tr>
+                <th>Name of the College/Institute</th>
+                <td>{{ college_name or 'N/A' }}</td>
+            </tr>
+        </table>
+
+        <!-- DEGREE AND SEMESTER INFO -->
+        <h3>Grade Cum Marks Sheet</h3>
+        <h3>{{ degree_name or 'Bachelor of Technology (Computer Science & Engineering)' }}</h3>
+        <h3>{{ semester_info or 'FIFTH Semester, Nov-2024' }}</h3>
+
+        <!-- STUDENT PERSONAL DETAILS -->
+        <table class="info-table">
+            <tr>
+                <th>Name</th>
+                <td>{{ name }}</td>
+            </tr>
+            <tr>
+                <th>Father's Name</th>
+                <td>{{ father_name or 'N/A' }}</td>
+            </tr>
+            <tr>
+                <th>Mother's Name</th>
+                <td>{{ mother_name or 'N/A' }}</td>
+            </tr>
+        </table>
+
+        <!-- RESULT DETAILS -->
+        <h3 class="center">Result Details</h3>
+        <table class="result-table">
+            <tr>
+                <th>Subject Code</th>
+                <th>Subject Type</th>
+                <th>Credits</th>
+                <th>Grade</th>
+                <th>Internal Marks</th>
+                <th>External Marks</th>
+            </tr>
+            {% if subjects %}
+            {% for subject in subjects %}
+            <tr>
+                <td>{{ subject.code }}</td>
+                <td>{{ subject.type }}</td>
+                <td>{{ subject.credits }}</td>
+                <td>{{ subject.grade }}</td>
+                <td>{{ subject.internal_marks }}</td>
+                <td>{{ subject.external_marks }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="6" class="center">No subject data available</td>
+            </tr>
+            {% endif %}
+        </table>
+
+        <!-- GRADE MEANINGS -->
+        <h3 class="center">Grade Meaning</h3>
+        <table class="grade-table">
+            <tr>
+                <th>Grade</th>
+                <th>Meaning</th>
+                <th>Grade Point</th>
+            </tr>
+            <tr>
+                <td>O</td>
+                <td>Outstanding</td>
+                <td>10</td>
+            </tr>
+            <tr>
+                <td>A+</td>
+                <td>Excellent</td>
+                <td>9</td>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td>Very Good</td>
+                <td>8</td>
+            </tr>
+            <tr>
+                <td>B+</td>
+                <td>Good</td>
+                <td>7</td>
+            </tr>
+            <tr>
+                <td>B</td>
+                <td>Above Average</td>
+                <td>6</td>
+            </tr>
+            <tr>
+                <td>C</td>
+                <td>Average</td>
+                <td>5</td>
+            </tr>
+            <tr>
+                <td>P</td>
+                <td>Marginal / Pass</td>
+                <td>4</td>
+            </tr>
+            <tr>
+                <td>E</td>
+                <td>Detained</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>S / UN</td>
+                <td>Satisfactory / Not Satisfactory</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>F</td>
+                <td>Failed / ReAppear</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Ab</td>
+                <td>Absent</td>
+                <td>-</td>
+            </tr>
+        </table>
+
+        <!-- NOTES AND DATES -->
+        <p class="note"><b>Note:</b> These details are not valid for any legal purpose.</p>
+        <p class="note"><b>Result Notification Date:</b> {{ result_date or (issue_date if issue_date else 'N/A') }}</p>
+
+        <!-- CERTIFICATE HASH (OPTIONAL) -->
+        {% if cert_hash %}
+        <div class="certificate-hash">
+            <strong>Verification Hash:</strong><br>
+            {{ cert_hash }}<br>
+            <small>Scan QR code above to verify this certificate</small>
+        </div>
+        {% endif %}
+
+        <!-- VERIFICATION LINK -->
+        {% if verification_url %}
+        <p class="note" style="text-align: center; margin-top: 5px; font-size: 10px;">
+            <b>Verify Online:</b> <a href="{{ verification_url }}" style="color: #333; text-decoration: none;">{{
+                verification_url }}</a>
+        </p>
+        {% endif %}
+    </div>
+</body>
+
+</html>

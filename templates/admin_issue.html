@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Marksheet - BCT Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="dashboard-page">
+    {% include 'components/header.html' %}
+
+    <div class="main-layout">
+        {% include 'components/sidebar.html' %}
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Issue New Marksheet</h1>
+                <p>Create and issue a blockchain-verified marksheet</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    <span>{{ message }}</span>
+                    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="form-card">
+                <form method="POST" action="{{ url_for('admin_issue') }}" class="certificate-form" id="marksheetForm">
+                    <!-- University Information -->
+                    <div class="section-header"
+                        style="margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">
+                        <h3 class="text-gradient">University Information</h3>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="university_name">University Name <span
+                                    style="color: var(--danger)">*</span></label>
+                            <input type="text" id="university_name" name="university_name" required
+                                value="I.K. GUJRAL PUNJAB TECHNICAL UNIVERSITY, JALANDHAR">
+                        </div>
+                        <div class="form-group">
+                            <label for="university_address">University Address <span
+                                    style="color: var(--danger)">*</span></label>
+                            <input type="text" id="university_address" name="university_address" required
+                                value="Jalandhar–Kapurthala Highway, Jalandhar">
+                        </div>
+                    </div>
+
+                    <!-- Student Information -->
+                    <div class="section-header"
+                        style="margin-top: 30px; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">
+                        <h3 class="text-gradient">Student Information</h3>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="student_name">Student Name <span style="color: var(--danger)">*</span></label>
+                            <input type="text" id="student_name" name="student_name" required
+                                placeholder="Enter student's full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="student_email">Student Email (Recommended)</label>
+                            <input type="email" id="student_email" name="student_email"
+                                placeholder="student@example.com">
+                            <small style="color: var(--text-muted); display: block; margin-top: 5px;">Link to student
+                                account</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="roll_number">Registration/Roll Number <span
+                                    style="color: var(--danger)">*</span></label>
+                            <input type="text" id="roll_number" name="roll_number" required placeholder="e.g., 2201621">
+                        </div>
+                        <div class="form-group">
+                            <label for="father_name">Father's Name <span style="color: var(--danger)">*</span></label>
+                            <input type="text" id="father_name" name="father_name" required
+                                placeholder="Father's full name">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mother_name">Mother's Name <span style="color: var(--danger)">*</span></label>
+                            <input type="text" id="mother_name" name="mother_name" required
+                                placeholder="Mother's full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="college_id">College/Institute ID <span
+                                    style="color: var(--danger)">*</span></label>
+                            <input type="text" id="college_id" name="college_id" required placeholder="e.g., 26">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="college_name">College/Institute Name <span
+                                    style="color: var(--danger)">*</span></label>
+                            <input type="text" id="college_name" name="college_name" required
+                                placeholder="Full college name">
+                        </div>
+                        <div class="form-group">
+                            <label for="degree_name">Degree Name <span style="color: var(--danger)">*</span></label>
+                            <input type="text" id="degree_name" name="degree_name" required
+                                value="Bachelor of Technology (Computer Science & Engineering)">
+                        </div>
+                    </div>
+
+                    <!-- Academic Information -->
+                    <div class="section-header"
+                        style="margin-top: 30px; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">
+                        <h3 class="text-gradient">Academic Information</h3>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="semester_info">Semester Information <span
+                                    style="color: var(--danger)">*</span></label>
+                            <input type="text" id="semester_info" name="semester_info" required
+                                placeholder="e.g., FIFTH Semester, Nov-2024">
+                        </div>
+                        <div class="form-group">
+                            <label for="result_date">Result Notification Date <span
+                                    style="color: var(--danger)">*</span></label>
+                            <input type="date" id="result_date" name="result_date" required>
+                        </div>
+                    </div>
+
+                    <!-- Subjects -->
+                    <div class="section-header"
+                        style="margin-top: 30px; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">
+                        <h3 class="text-gradient">Subject Details</h3>
+                    </div>
+
+                    <div class="subjects-container">
+                        <div class="subject-header"
+                            style="display: grid; grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 10px; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">
+                            <span>Subject Code</span>
+                            <span>Type</span>
+                            <span>Credits</span>
+                            <span>Grade</span>
+                            <span>Internal</span>
+                            <span>External</span>
+                            <span>Action</span>
+                        </div>
+
+                        <div id="subjectsList">
+                            <div class="subject-row">
+                                <input type="text" name="subject_code[]" placeholder="Sub Code" required>
+                                <input type="text" name="subject_type[]" placeholder="Type" required>
+                                <input type="number" name="subject_credits[]" placeholder="Cr" min="0" step="0.5"
+                                    required>
+                                <select name="subject_grade[]" required>
+                                    <option value="">Grade</option>
+                                    <option value="O">O</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A">A</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="P">P</option>
+                                    <option value="E">E</option>
+                                    <option value="F">F</option>
+                                    <option value="Ab">Ab</option>
+                                </select>
+                                <input type="number" name="subject_internal[]" placeholder="Int" min="0" max="100">
+                                <input type="number" name="subject_external[]" placeholder="Ext" min="0" max="100">
+                                <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="alert('Cannot remove first row')">×</button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary add-subject-btn" onclick="addSubjectRow()">+ Add
+                            Subject</button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Issue Marksheet 📜
+                        </button>
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary"
+                            style="border: none; background: transparent;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="info-card">
+                <h3>ℹ️ Marksheet Information</h3>
+                <ul style="padding-left: 20px; margin-top: 10px; color: var(--text-muted);">
+                    <li style="margin-bottom: 5px;">Marksheet will be generated as a PDF with embedded QR code</li>
+                    <li style="margin-bottom: 5px;">Marksheet hash will be stored in the blockchain</li>
+                    <li style="margin-bottom: 5px;">QR code can be scanned to verify marksheet authenticity</li>
+                    <li>All data will be automatically saved to the database</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    {% include 'components/footer.html' %}
+
+    <script>
+        // Set today's date as default
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateInput = document.getElementById('result_date');
+            if (dateInput && !dateInput.value) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.value = today;
+            }
+        });
+
+        function addSubjectRow() {
+            const container = document.getElementById('subjectsList');
+            const newRow = document.createElement('div');
+            newRow.className = 'subject-row animate-fade-in';
+            newRow.innerHTML = `
+                <input type="text" name="subject_code[]" placeholder="Sub Code" required>
+                <input type="text" name="subject_type[]" placeholder="Type" required>
+                <input type="number" name="subject_credits[]" placeholder="Cr" min="0" step="0.5" required>
+                <select name="subject_grade[]" required>
+                    <option value="">Grade</option>
+                    <option value="O">O</option>
+                    <option value="A+">A+</option>
+                    <option value="A">A</option>
+                    <option value="B+">B+</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="P">P</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                    <option value="Ab">Ab</option>
+                </select>
+                <input type="number" name="subject_internal[]" placeholder="Int" min="0" max="100">
+                <input type="number" name="subject_external[]" placeholder="Ext" min="0" max="100">
+                <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">×</button>
+            `;
+            container.appendChild(newRow);
+        }
+    </script>
+</body>
+
+</html>

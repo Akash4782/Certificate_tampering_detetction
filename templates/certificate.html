@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Certificate of Completion</title>
+<style>
+    body {
+        width: 800px;
+        height: 600px;
+        margin: auto;
+        padding: 40px;
+        text-align: center;
+        font-family: 'Times New Roman', serif;
+        border: 10px solid #2c3e50;
+        background-color: #fdfdfd;
+        position: relative;
+    }
+
+    .title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+
+    .sub {
+        font-size: 20px;
+        margin-top: 15px;
+        color: #34495e;
+    }
+
+    h2 {
+        font-size: 28px;
+        margin: 10px 0;
+        color: #e74c3c;
+    }
+
+    h3 {
+        font-size: 24px;
+        margin: 10px 0;
+        color: #2980b9;
+    }
+
+    .qr-code {
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        width: 120px;
+        height: 120px;
+    }
+
+    .footer {
+        position: absolute;
+        bottom: 30px;
+        left: 40px;
+        font-size: 14px;
+        color: #7f8c8d;
+    }
+</style>
+</head>
+<body>
+
+<div class="title">Certificate of Completion</div>
+
+<div class="sub">This is to certify that</div>
+<h2>{{ name }}</h2>
+
+<div class="sub">has successfully completed</div>
+<h3>{{ course }}</h3>
+
+<div class="sub">Issued on: {{ date }}</div>
+
+<!-- QR Code for verification -->
+<!-- QR Code for verification -->
+{% if qr_code_path %}
+<img src="{{ qr_code_path }}" alt="QR Code" class="qr-code">
+{% endif %}
+
+<div class="footer">Scan the QR code to verify this certificate.</div>
+
+</body>
+</html>

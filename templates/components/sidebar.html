@@ -1,0 +1,52 @@
+<!-- sidebar.html -->
+<aside class="sidebar">
+    <div class="sidebar-content">
+        <div class="sidebar-header">
+            <h3>Navigation</h3>
+        </div>
+        <nav class="sidebar-nav">
+            {% if current_user.is_admin() %}
+            <a href="{{ url_for('admin_dashboard') }}"
+                class="sidebar-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                <span class="icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('admin_students') }}"
+                class="sidebar-link {% if request.endpoint == 'admin_students' %}active{% endif %}">
+                <span class="icon">👥</span>
+                <span>Manage Students</span>
+            </a>
+            <a href="{{ url_for('admin_issue') }}"
+                class="sidebar-link {% if request.endpoint == 'admin_issue' %}active{% endif %}">
+                <span class="icon">➕</span>
+                <span>Issue Certificate</span>
+            </a>
+            <a href="{{ url_for('admin_certificates') }}"
+                class="sidebar-link {% if request.endpoint == 'admin_certificates' %}active{% endif %}">
+                <span class="icon">📜</span>
+                <span>All Certificates</span>
+            </a>
+            {% else %}
+            <a href="{{ url_for('student_dashboard') }}"
+                class="sidebar-link {% if request.endpoint == 'student_dashboard' %}active{% endif %}">
+                <span class="icon">📊</span>
+                <span>My Dashboard</span>
+            </a>
+            <a href="{{ url_for('student_dashboard') }}#certificates" class="sidebar-link">
+                <span class="icon">📜</span>
+                <span>My Certificates</span>
+            </a>
+            {% endif %}
+            <a href="{{ url_for('blockchain_explorer') }}"
+                class="sidebar-link {% if request.endpoint == 'blockchain_explorer' %}active{% endif %}">
+                <span class="icon">🔗</span>
+                <span>Blockchain Explorer</span>
+            </a>
+            <a href="{{ url_for('verify') }}"
+                class="sidebar-link {% if request.endpoint == 'verify' %}active{% endif %}">
+                <span class="icon">✓</span>
+                <span>Verify Certificate</span>
+            </a>
+        </nav>
+    </div>
+</aside>
