@@ -4,33 +4,43 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 venv/
+env/
 ENV/
+*.egg-info/
+dist/
+build/
+
+# Flask
+instance/
+.webassets-cache
+
+# Environment variables
+.env
 
 # Database
 *.db
 *.sqlite
 *.sqlite3
 
-# Environment
-.env
-.env.local
+# Certificates and QR codes
+certificates/*.pdf
+static/qr/*.png
+signed/
+
+# Blockchain data (optional - remove if you want to persist)
+blockchain_data.json
 
 # IDE
 .vscode/
 .idea/
 *.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Uploads
-uploads/*
-!uploads/.gitkeep
-qr_codes/*
-!qr_codes/.gitkeep
-
-# Blockchain
-blockchain.json
+# Logs
+*.log

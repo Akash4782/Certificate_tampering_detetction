@@ -20,32 +20,9 @@ from database import db, init_db, login_manager
 from blockchain import Blockchain
 from models import User, Certificate, VerificationLog
 
-# Helper function for environment-based URL generation
-def get_base_url():
-    """Get base URL from environment or use localhost for development"""
-    return os.environ.get('BASE_URL', 'http://localhost:5000')
-
 # Initialize Flask app
 app = Flask(__name__)
-
-# Production database configuration
-if os.environ.get('FLASK_ENV') == 'production':
-    # Use PostgreSQL in production (Render, Railway, etc.)
-    database_url = os.environ.get('DATABASE_URL')
-    if database_url and database_url.startswith('postgres://'):
-        # Fix for SQLAlchemy 1.4+ which requires postgresql:// instead of postgres://
-        database_url = database_url.replace('postgres://', 'postgresql://', 1)
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///certificates.db'
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'production-secret-key-change-this')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    # Copy other configs from Config
-    app.config['UPLOAD_FOLDER'] = 'uploads'
-    app.config['QR_FOLDER'] = 'qr_codes'
-    app.config['BLOCKCHAIN_FILE'] = 'blockchain.json'
-    app.config['CERTIFICATES_PER_PAGE'] = 10
-else:
-    # Development configuration
-    app.config.from_object(Config)
+app.config.from_object(Config)
 
 # Initialize Mail
 mail = Mail(app)
@@ -72,6 +49,32 @@ def admin_required(f):
             return redirect(url_for('student_dashboard'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+def get_base_url():
+    """Get the base URL for the application"""
+    try:
+        # Try to get from request context
+        from flask import request
+        return request.url_root.rstrip('/')
+    except:
+        # Fallback to localhost for development
+        return 'http://localhost:5000'
+
+
+def get_pdfkit_config():
+    """Get pdfkit configuration for current environment"""
+    import platform
+    
+    # On Windows (development), use the installed path
+    if platform.system() == 'Windows':
+        wkhtmltopdf_path = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
+        if os.path.exists(wkhtmltopdf_path):
+            return pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+    
+    # On Linux (production - Render), wkhtmltopdf is in PATH after build.sh
+    # pdfkit will find it automatically
+    return None
 
 
 
@@ -118,6 +121,12 @@ def index():
         else:
             return redirect(url_for('student_dashboard'))
     return redirect(url_for('login'))
+
+
+@app.route('/health')
+def health():
+    """Health check endpoint for Render"""
+    return {'status': 'healthy', 'service': 'BCT Project'}, 200
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -272,7 +281,7 @@ def admin_batch_issue():
             errors = []
             
             # PDF Config (Reusable)
-            config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
+            config = get_pdfkit_config()
             options = {
                 'enable-local-file-access': None,
                 'page-size': 'A4',
@@ -603,9 +612,7 @@ def admin_issue():
         iteration = 0
         
         # PDF generation config
-        config = pdfkit.configuration(
-            wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
-        )
+        config = get_pdfkit_config()
         options = {
             'enable-local-file-access': None,
             'page-size': 'A4',
