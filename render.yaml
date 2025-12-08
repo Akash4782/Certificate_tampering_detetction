@@ -2,7 +2,6 @@ services:
   - type: web
     name: bct-project
     env: docker
-    region: oregon
     plan: free
     branch: main
     envVars:
