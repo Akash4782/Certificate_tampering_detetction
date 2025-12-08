@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 import hashlib
 import json
 import pdfkit
@@ -22,6 +23,8 @@ from models import User, Certificate, VerificationLog
 
 # Initialize Flask app
 app = Flask(__name__)
+# Add ProxyFix for proper URL generation behind proxies (like Nginx/PythonAnywhere)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.config.from_object(Config)
 
 # Initialize Mail
@@ -60,21 +63,6 @@ def get_base_url():
     except:
         # Fallback to localhost for development
         return 'http://localhost:5000'
-
-
-def get_pdfkit_config():
-    """Get pdfkit configuration for current environment"""
-    import platform
-    
-    # On Windows (development), use the installed path
-    if platform.system() == 'Windows':
-        wkhtmltopdf_path = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
-        if os.path.exists(wkhtmltopdf_path):
-            return pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
-    
-    # On Linux (production - Render), wkhtmltopdf is in PATH after build.sh
-    # pdfkit will find it automatically
-    return None
 
 
 
@@ -281,7 +269,26 @@ def admin_batch_issue():
             errors = []
             
             # PDF Config (Reusable)
-            config = get_pdfkit_config()
+            wkhtmltopdf_path = os.environ.get('WKHTMLTOPDF_PATH')
+            if not wkhtmltopdf_path:
+                # Fallback for Windows local dev
+                possible_paths = [
+                    r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe",
+                    r"C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe"
+                ]
+                for path in possible_paths:
+                    if os.path.exists(path):
+                        wkhtmltopdf_path = path
+                        break
+            
+            # If still not found (e.g. on Linux/Mac), pdfkit might find it in PATH automatically
+            # or we set it to None to let pdfkit decide (usually 'wkhtmltopdf')
+            
+            if wkhtmltopdf_path and os.path.exists(wkhtmltopdf_path):
+                config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+            else:
+                config = pdfkit.configuration() # Let pdfkit find it in PATH
+
             options = {
                 'enable-local-file-access': None,
                 'page-size': 'A4',
@@ -612,7 +619,23 @@ def admin_issue():
         iteration = 0
         
         # PDF generation config
-        config = get_pdfkit_config()
+        wkhtmltopdf_path = os.environ.get('WKHTMLTOPDF_PATH')
+        if not wkhtmltopdf_path:
+            # Fallback for Windows local dev
+            possible_paths = [
+                r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe",
+                r"C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe"
+            ]
+            for path in possible_paths:
+                if os.path.exists(path):
+                    wkhtmltopdf_path = path
+                    break
+                    
+        if wkhtmltopdf_path and os.path.exists(wkhtmltopdf_path):
+            config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+        else:
+            config = pdfkit.configuration()
+
         options = {
             'enable-local-file-access': None,
             'page-size': 'A4',

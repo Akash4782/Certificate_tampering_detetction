@@ -271,5 +271,19 @@
     "previous_hash": "5dbdbc724f97f24388d96ae3d155481c60156911afd985baa6dba3a37ff53e8e",
     "timestamp": "2025-12-08T11:20:51.292411",
     "hash": "7690bcd4a60643b38637c49a664aacc7613a21f43934a81e67d0a7ab52e48216"
+  },
+  {
+    "index": 39,
+    "certificate_hash": "{\"cert_id\": \"2201621_1765181494\", \"pdf_hash\": \"1400d7aecc70142a7400508d92c03f727ca884ab15589fc9410bae8914a92a62\"}",
+    "previous_hash": "7690bcd4a60643b38637c49a664aacc7613a21f43934a81e67d0a7ab52e48216",
+    "timestamp": "2025-12-08T13:41:38.240559",
+    "hash": "306b7783d0e4425cce17a8e40b2d5d5b597899217665159bccc44a89ecf12967"
+  },
+  {
+    "index": 40,
+    "certificate_hash": "{\"cert_id\": \"21_1765183063\", \"pdf_hash\": \"23f492ef15e4590b18e1ec96e587605e26e493dbebc0580174df4c9bf68be6cf\"}",
+    "previous_hash": "306b7783d0e4425cce17a8e40b2d5d5b597899217665159bccc44a89ecf12967",
+    "timestamp": "2025-12-08T14:07:46.996402",
+    "hash": "63042c509138dd63a8fc2216c79ca02793aee393e73c65e21ec2707d9a90e4e6"
   }
 ]
