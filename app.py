@@ -33,6 +33,18 @@ mail = Mail(app)
 # Initialize extensions
 init_db(app)
 
+# Initialize Database & Default Admin (Critical for first run on Railway)
+with app.app_context():
+    db.create_all()
+    # Check if admin exists
+    if not User.query.filter_by(username='admin').first():
+        print("Creating default admin user...")
+        admin = User(username='admin', email='admin@bctproject.com', role='admin')
+        admin.set_password('admin123')
+        db.session.add(admin)
+        db.session.commit()
+        print("✓ Default admin created: admin / admin123")
+
 # Initialize blockchain
 blockchain = Blockchain(persist_file=app.config.get('BLOCKCHAIN_FILE'))
 
