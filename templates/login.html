@@ -7,6 +7,29 @@
     <title>Login - BCT Project</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Mobile responsiveness for login page */
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 1.5rem;
+                max-width: 100%;
+            }
+
+            .auth-logo {
+                font-size: 2rem;
+            }
+
+            .auth-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .auth-container {
+                padding: 10px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -58,10 +81,25 @@
 
             <div class="auth-footer">
                 <p>Need an account? Contact your administrator.</p>
-                <!-- <p style="margin-top: 5px;"><a href="#" style="font-size: 0.85rem; opacity: 0.8;">Forgot Password?</a></p> -->
             </div>
         </div>
     </div>
+
+    <script>
+        // Auto-hide flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function () {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function (message) {
+                setTimeout(function () {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateY(-10px)';
+                    setTimeout(function () {
+                        message.remove();
+                    }, 300);
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 
 </html>
