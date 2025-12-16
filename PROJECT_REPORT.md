@@ -678,8 +678,8 @@ The system is currently deployed and operational, serving as both a functional a
 
 ---
 
-**Project Repository**: [GitHub Repository Link]  
-**Live Demo**: https://bcertificate-production.up.railway.app  
+**Project Repository**:(https://github.com/Akash4782/Certificate_tampering_detetction)
+**Live Demo**: https://web-production-1ca65.up.railway.app/login
 **Default Admin Login**: `admin` / `admin123`
 
 ---
