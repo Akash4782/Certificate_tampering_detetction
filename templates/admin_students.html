@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Students - BCT Project</title>
+    <title>Manage Students - Certificate Tampering Detection</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body class="dashboard-page">
     {% include 'components/header.html' %}
-    
+
     <div class="main-layout">
         {% include 'components/sidebar.html' %}
-        
+
         <main class="main-content">
             <div class="page-header">
                 <h1>Manage Students</h1>
                 <p>Create and manage student accounts</p>
             </div>
-            
+
             {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="flash-messages">
-                        {% for category, message in messages %}
-                            <div class="flash-message flash-{{ category }}">
-                                <span>{{ message }}</span>
-                                <button class="flash-close" onclick="this.parentElement.remove()">×</button>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    <span>{{ message }}</span>
+                    <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% endwith %}
-            
+
             <!-- Create Student Form -->
             <div class="form-card">
                 <h3>Create New Student Account</h3>
@@ -39,29 +41,27 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="username">Username *</label>
-                            <input type="text" id="username" name="username" required 
-                                   placeholder="Enter unique username" minlength="3">
+                            <input type="text" id="username" name="username" required
+                                placeholder="Enter unique username" minlength="3">
                             <small>Must be unique. Used for login.</small>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="email">Email *</label>
-                            <input type="email" id="email" name="email" required 
-                                   placeholder="student@example.com">
+                            <input type="email" id="email" name="email" required placeholder="student@example.com">
                             <small>Must be unique. Used for certificate linking.</small>
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="password">Password *</label>
-                            <input type="text" id="password" name="password" required 
-                                   placeholder="Enter password (min 6 characters)" minlength="6"
-                                   value="{{ '' }}">
+                            <input type="text" id="password" name="password" required
+                                placeholder="Enter password (min 6 characters)" minlength="6" value="{{ '' }}">
                             <small>Minimum 6 characters. Share this with the student securely.</small>
                         </div>
                     </div>
-                    
+
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary btn-lg">
                             <span>Create Student Account</span>
@@ -73,21 +73,21 @@
                     </div>
                 </form>
             </div>
-            
+
             <!-- Search and Filter -->
             <div class="filters-card">
                 <form method="GET" action="{{ url_for('admin_students') }}" class="filters-form">
                     <div class="filter-group">
-                        <input type="text" name="search" placeholder="Search by username or email..." 
-                               value="{{ search }}" class="filter-input">
+                        <input type="text" name="search" placeholder="Search by username or email..."
+                            value="{{ search }}" class="filter-input">
                     </div>
                     <button type="submit" class="btn btn-primary">Search</button>
                     {% if search %}
-                        <a href="{{ url_for('admin_students') }}" class="btn btn-secondary">Clear</a>
+                    <a href="{{ url_for('admin_students') }}" class="btn btn-secondary">Clear</a>
                     {% endif %}
                 </form>
             </div>
-            
+
             <!-- Students Table -->
             <div class="content-card">
                 <h3>All Students ({{ pagination.total }})</h3>
@@ -116,25 +116,26 @@
                                     <span class="badge badge-info">{{ cert_count }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-{% if student.is_active %}success{% else %}danger{% endif %}">
+                                    <span
+                                        class="badge badge-{% if student.is_active %}success{% else %}danger{% endif %}">
                                         {% if student.is_active %}Active{% else %}Inactive{% endif %}
                                     </span>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <button type="button" class="btn btn-sm btn-warning" 
-                                                onclick="showResetPasswordModal({{ student.id }}, '{{ student.username }}')">
+                                        <button type="button" class="btn btn-sm btn-warning"
+                                            onclick="showResetPasswordModal({{ student.id }}, '{{ student.username }}')">
                                             Reset Password
                                         </button>
                                         {% if student.certificates|length == 0 %}
-                                        <form method="POST" action="{{ url_for('delete_student', user_id=student.id) }}" 
-                                              style="display: inline;" 
-                                              onsubmit="return confirm('Are you sure you want to delete {{ student.username }}? This cannot be undone.');">
+                                        <form method="POST" action="{{ url_for('delete_student', user_id=student.id) }}"
+                                            style="display: inline;"
+                                            onsubmit="return confirm('Are you sure you want to delete {{ student.username }}? This cannot be undone.');">
                                             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                                         </form>
                                         {% else %}
-                                        <button type="button" class="btn btn-sm btn-secondary" disabled 
-                                                title="Cannot delete student with certificates">
+                                        <button type="button" class="btn btn-sm btn-secondary" disabled
+                                            title="Cannot delete student with certificates">
                                             Delete
                                         </button>
                                         {% endif %}
@@ -149,49 +150,51 @@
                         </tbody>
                     </table>
                 </div>
-                
+
                 <!-- Pagination -->
                 {% if pagination.pages > 1 %}
                 <div class="pagination">
                     {% if pagination.has_prev %}
-                        <a href="{{ url_for('admin_students', page=pagination.prev_num, search=search) }}" 
-                           class="pagination-link">Previous</a>
+                    <a href="{{ url_for('admin_students', page=pagination.prev_num, search=search) }}"
+                        class="pagination-link">Previous</a>
                     {% endif %}
-                    
-                    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-                        {% if page_num %}
-                            {% if page_num == pagination.page %}
-                                <span class="pagination-link active">{{ page_num }}</span>
-                            {% else %}
-                                <a href="{{ url_for('admin_students', page=page_num, search=search) }}" 
-                                   class="pagination-link">{{ page_num }}</a>
-                            {% endif %}
-                        {% else %}
-                            <span class="pagination-ellipsis">...</span>
-                        {% endif %}
+
+                    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2)
+                    %}
+                    {% if page_num %}
+                    {% if page_num == pagination.page %}
+                    <span class="pagination-link active">{{ page_num }}</span>
+                    {% else %}
+                    <a href="{{ url_for('admin_students', page=page_num, search=search) }}" class="pagination-link">{{
+                        page_num }}</a>
+                    {% endif %}
+                    {% else %}
+                    <span class="pagination-ellipsis">...</span>
+                    {% endif %}
                     {% endfor %}
-                    
+
                     {% if pagination.has_next %}
-                        <a href="{{ url_for('admin_students', page=pagination.next_num, search=search) }}" 
-                           class="pagination-link">Next</a>
+                    <a href="{{ url_for('admin_students', page=pagination.next_num, search=search) }}"
+                        class="pagination-link">Next</a>
                     {% endif %}
                 </div>
                 {% endif %}
             </div>
         </main>
     </div>
-    
+
     {% include 'components/footer.html' %}
-    
+
     <!-- Reset Password Modal -->
-    <div id="resetPasswordModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div id="resetPasswordModal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
         <div style="background: white; padding: 2rem; border-radius: 0.75rem; max-width: 500px; width: 90%;">
             <h3>Reset Password for <span id="modalStudentName"></span></h3>
             <form method="POST" action="" id="resetPasswordForm">
                 <div class="form-group">
                     <label for="new_password">New Password *</label>
-                    <input type="text" id="new_password" name="new_password" required 
-                           placeholder="Enter new password (min 6 characters)" minlength="6">
+                    <input type="text" id="new_password" name="new_password" required
+                        placeholder="Enter new password (min 6 characters)" minlength="6">
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Reset Password</button>
@@ -201,18 +204,18 @@
             </form>
         </div>
     </div>
-    
+
     <script>
         function generatePassword() {
             const password = generateRandomPassword();
             document.getElementById('password').value = password;
         }
-        
+
         function generatePasswordForModal() {
             const password = generateRandomPassword();
             document.getElementById('new_password').value = password;
         }
-        
+
         function generateRandomPassword() {
             const length = 12;
             const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
@@ -222,25 +225,25 @@
             }
             return password;
         }
-        
+
         function showResetPasswordModal(userId, username) {
             document.getElementById('modalStudentName').textContent = username;
             document.getElementById('resetPasswordForm').action = `/admin/students/${userId}/reset-password`;
             document.getElementById('resetPasswordModal').style.display = 'flex';
         }
-        
+
         function closeResetPasswordModal() {
             document.getElementById('resetPasswordModal').style.display = 'none';
             document.getElementById('new_password').value = '';
         }
-        
+
         // Close modal on outside click
-        document.getElementById('resetPasswordModal').addEventListener('click', function(e) {
+        document.getElementById('resetPasswordModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeResetPasswordModal();
             }
         });
     </script>
 </body>
-</html>
 
+</html>

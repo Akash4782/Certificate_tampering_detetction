@@ -1,4 +1,4 @@
-# BCT Project - Blockchain Certificate Tracking
+# Certificate Tampering Detection - Blockchain Certificate Tracking
 
 A secure, blockchain-based certificate verification system built with Flask.
 

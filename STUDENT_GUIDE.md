@@ -1,4 +1,4 @@
-# 📚 Student Guide - BCT Project
+# 📚 Student Guide - Certificate Tampering Detection
 
 ## How Students Can Access Their Certificates
 

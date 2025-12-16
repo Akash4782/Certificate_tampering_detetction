@@ -1,6 +1,6 @@
-# 🚀 Quick Start Guide - BCT Project
+# 🚀 Quick Start Guide - Certificate Tampering Detection
 
-Follow these steps to get your BCT Project running in minutes!
+Follow these steps to get your Certificate Tampering Detection system running in minutes!
 
 ## Step-by-Step Instructions
 
@@ -152,5 +152,5 @@ pip install -r requirements.txt
 
 ## 🎉 You're All Set!
 
-Your BCT Project is now running! Start issuing certificates and exploring the features.
+Your Certificate Tampering Detection system is now running! Start issuing certificates and exploring the features.
 

@@ -1,2 +1,2 @@
-# Utils package for BCT Project
+# Utils package for Certificate Tampering Detection
 

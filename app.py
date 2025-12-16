@@ -39,7 +39,7 @@ with app.app_context():
     # Check if admin exists
     if not User.query.filter_by(username='admin').first():
         print("Creating default admin user...")
-        admin = User(username='admin', email='admin@bctproject.com', role='admin')
+        admin = User(username='admin', email='admin@certificateverifier.com', role='admin')
         admin.set_password('admin123')
         db.session.add(admin)
         db.session.commit()
@@ -126,7 +126,7 @@ def index():
 @app.route('/health')
 def health():
     """Health check endpoint for Render"""
-    return {'status': 'healthy', 'service': 'BCT Project'}, 200
+    return {'status': 'healthy', 'service': 'Certificate Tampering Detection'}, 200
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -1320,7 +1320,7 @@ if __name__ == '__main__':
     create_tables()
 
     print("\n" + "="*50)
-    print("🚀 BCT Project is running!")
+    print("🚀 Certificate Tampering Detection is running!")
     print("📱 Open your browser and go to: http://localhost:5000")
     print("🔐 Login credentials: admin / admin123")
     print("="*50 + "\n")
