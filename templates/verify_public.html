@@ -49,7 +49,7 @@
 
             <div class="verify-container">
                 <!-- Show cert_id and hash if from QR code -->
-                {% if cert_id and qr_hash %}
+                {% if cert_id %}
                 <div class="verify-card">
                     <h3>Certificate Information</h3>
                     <div class="info-display">
@@ -57,16 +57,18 @@
                             <span class="info-label">Certificate ID:</span>
                             <span class="info-value">{{ cert_id }}</span>
                         </div>
+                        {% if qr_hash %}
                         <div class="info-row">
                             <span class="info-label">Original Hash (from QR):</span>
                             <span class="info-value hash-value">{{ qr_hash }}</span>
                         </div>
+                        {% endif %}
                     </div>
 
                     <form method="POST" action="{{ url_for('verify_upload') }}" enctype="multipart/form-data"
                         class="verify-form">
                         <input type="hidden" name="cert_id" value="{{ cert_id }}">
-                        <input type="hidden" name="hash" value="{{ qr_hash }}">
+                        <input type="hidden" name="hash" value="{{ qr_hash or '' }}">
 
                         <div class="form-group">
                             <label for="file">Upload Certificate PDF</label>
@@ -138,7 +140,7 @@
                         </div>
                         {% endif %}
 
-                        {% if uploaded_hash and chain_hash and qr_hash %}
+                        {% if uploaded_hash and chain_hash %}
                         <div class="hash-comparison">
                             <h4>Hash Verification</h4>
                             <div class="info-row">
@@ -149,13 +151,58 @@
                                 <span class="info-label">Blockchain Hash:</span>
                                 <span class="info-value hash-value">{{ chain_hash }}</span>
                             </div>
+                            {% if qr_hash %}
                             <div class="info-row">
                                 <span class="info-label">QR Code Hash:</span>
                                 <span class="info-value hash-value">{{ qr_hash }}</span>
                             </div>
+                            {% endif %}
                             <div class="hash-match">
-                                <p>✅ All hashes match - Certificate is authentic</p>
+                                <p>✅ Document Hash Matches Blockchain Record</p>
                             </div>
+
+                            {% if certificate %}
+                            <div
+                                class="student-details mt-6 p-4 bg-white/5 rounded-lg border border-white/10 text-left">
+                                <h5 class="text-lg font-bold text-blue-400 mb-3 border-b border-white/10 pb-2">
+                                    Certificate Details</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <span class="text-sm text-gray-500 block">Student Name</span>
+                                        <span class="text-base font-medium text-white">{{ certificate.student_name
+                                            }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-sm text-gray-500 block">Roll Number</span>
+                                        {% if certificate.marksheet_data %}
+                                        <span class="text-base font-medium text-white">{{
+                                            certificate.marksheet_data.get('roll_number', 'N/A') }}</span>
+                                        {% else %}
+                                        <span class="text-base font-medium text-white">N/A</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <span class="text-sm text-gray-500 block">Course/Degree</span>
+                                        <span class="text-base font-medium text-white">{{ certificate.course_name
+                                            }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-sm text-gray-500 block">University</span>
+                                        {% if certificate.marksheet_data %}
+                                        <span class="text-base font-medium text-white">{{
+                                            certificate.marksheet_data.get('university_name', 'University') }}</span>
+                                        {% else %}
+                                        <span class="text-base font-medium text-white">N/A</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <span class="text-sm text-gray-500 block">Issue Date</span>
+                                        <span class="text-base font-medium text-white">{{
+                                            certificate.issue_date.strftime('%d-%m-%Y') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                         {% endif %}
 
@@ -185,7 +232,7 @@
                     </div>
                     {% else %}
                     <div class="result-body">
-                        {% if uploaded_hash and chain_hash and qr_hash %}
+                        {% if uploaded_hash and chain_hash %}
                         <div class="hash-comparison">
                             <h4>Hash Verification</h4>
                             <div class="info-row">
@@ -196,10 +243,12 @@
                                 <span class="info-label">Blockchain Hash:</span>
                                 <span class="info-value hash-value">{{ chain_hash }}</span>
                             </div>
+                            {% if qr_hash %}
                             <div class="info-row">
                                 <span class="info-label">QR Code Hash:</span>
                                 <span class="info-value hash-value">{{ qr_hash }}</span>
                             </div>
+                            {% endif %}
                             <div class="hash-mismatch">
                                 <p>❌ Hashes do not match - Certificate has been tampered with</p>
                             </div>

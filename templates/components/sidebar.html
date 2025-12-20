@@ -21,6 +21,11 @@
                 <span class="icon">➕</span>
                 <span>Issue Certificate</span>
             </a>
+            <a href="{{ url_for('admin_batch_issue') }}"
+                class="sidebar-link {% if request.endpoint == 'admin_batch_issue' %}active{% endif %}">
+                <span class="icon">🚀</span>
+                <span>Batch Issue</span>
+            </a>
             <a href="{{ url_for('admin_certificates') }}"
                 class="sidebar-link {% if request.endpoint == 'admin_certificates' %}active{% endif %}">
                 <span class="icon">📜</span>
